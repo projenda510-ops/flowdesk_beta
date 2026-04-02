@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlowDesk Beta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: rgba(255,255,255,0.06);
+      --teal: #5eead4;
+      --teal-dim: rgba(94,234,212,0.12);
+      --teal-glow: rgba(94,234,212,0.06);
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --mono: 'DM Mono', monospace;
+      --sans: 'Manrope', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* glow bg */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(94,234,212,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* NAV */
+    nav {
+      position: relative;
+      z-index: 10;
+      padding: 28px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--teal-dim);
+      border: 1px solid rgba(94,234,212,0.25);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--teal);
+    }
+
+    .logo-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--teal);
+      background: var(--teal-dim);
+      border: 1px solid rgba(94,234,212,0.2);
+      border-radius: 4px;
+      padding: 3px 8px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* HERO */
+    .hero {
+      padding: 80px 0 64px;
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .hero-tag::before {
+      content: '';
+      display: block;
+      width: 18px;
+      height: 1px;
+      background: var(--muted);
+    }
+
+    h1 {
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    h1 span {
+      color: var(--teal);
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 480px;
+      margin-bottom: 36px;
+      font-weight: 400;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--teal);
+      color: #0a0a0f;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      letter-spacing: -0.2px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .cta-btn:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    .cta-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* DIVIDER */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0;
+    }
+
+    /* SECTION */
+    section {
+      padding: 56px 0;
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.15s;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--teal);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--muted);
+    }
+
+    /* NOTICE BOX */
+    .notice {
+      background: rgba(255, 200, 80, 0.05);
+      border: 1px solid rgba(255, 200, 80, 0.15);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+
+    .notice-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fbbf24;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .notice p {
+      font-size: 14px;
+      color: rgba(251,191,36,0.7);
+      line-height: 1.65;
+    }
+
+    /* FEATURES */
+    .features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 500px) {
+      .features { grid-template-columns: 1fr; }
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(94,234,212,0.15);
+    }
+
+    .feature-icon {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .feature-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .feature-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* RULES LIST */
+    .rules {
+      list-style: none;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .rules li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .rules li::before {
+      content: '—';
+      color: var(--teal);
+      font-family: var(--mono);
+      font-size: 12px;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer p {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--teal);
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- NAV -->
+    <nav>
+      <a class="logo" href="#">
+        <div class="logo-mark">F</div>
+        <span class="logo-name">FlowDesk</span>
+      </a>
+      <span class="badge">Beta</span>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-tag">Early Access Program</div>
+      <h1>Manage projects<br/>with <span>AI at the core.</span></h1>
+      <p class="hero-sub">
+        FlowDesk is an AI-powered productivity app combining project management,
+        task tracking, documents, and an AI assistant — all in one place.
+      </p>
+      <a class="cta-btn" href="YOUR_GOOGLE_FORM_LINK" target="_blank">
+        Request Beta Access
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- BETA NOTICE -->
+    <section>
+      <div class="section-label">Please Read</div>
+      <h2>This is a Beta version</h2>
+      <p>
+        FlowDesk is currently in early beta. We're actively building and improving the product.
+        Your feedback directly shapes what we build next.
+      </p>
+
+      <div class="notice">
+        <div class="notice-title">
+          ⚠ Beta Disclaimer
+        </div>
+        <p>
+          Some features and design elements may not be fully polished yet.
+          You may encounter bugs, incomplete UI, or missing functionality.
+          This is expected — and exactly why we need testers like you.
+        </p>
+      </div>
+
+      <ul class="rules">
+        <li>Beta access is invite-only. You will receive credentials via email within 1–7 days of applying.</li>
+        <li>Data stored during beta may be reset before the official launch.</li>
+        <li>Beta is free. No payment required.</li>
+        <li>Your feedback is invaluable — please report bugs and share suggestions.</li>
+        <li>Beta access may be revoked if the platform is misused.</li>
+      </ul>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- FEATURES -->
+    <section style="animation-delay: 0.25s;">
+      <div class="section-label">What's included</div>
+      <h2>Beta features</h2>
+      <p>Here's what's available in the current beta build.</p>
+
+      <div class="features">
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <div class="feature-title">Project Management</div>
+          <div class="feature-desc">Create and organize projects with Kanban boards and timeline views.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <div class="feature-title">Task Tracking</div>
+          <div class="feature-desc">Detailed task views with priorities, deadlines, and time tracking.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <div class="feature-title">AI Assistant</div>
+          <div class="feature-desc">AI-powered project planner and chat — limited to 25 messages/day in beta.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📄</div>
+          <div class="feature-title">Documents</div>
+          <div class="feature-desc">Rich text documents linked to your projects.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📅</div>
+          <div class="feature-title">Calendar</div>
+          <div class="feature-desc">Calendar view of all your tasks and deadlines.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⏱</div>
+          <div class="feature-title">Focus Mode</div>
+          <div class="feature-desc">Built-in Pomodoro timer to stay in flow.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- HOW IT WORKS -->
+    <section style="animation-delay: 0.35s;">
+      <div class="section-label">How it works</div>
+      <h2>Getting access</h2>
+      <ul class="rules">
+        <li>Fill out the beta access request form.</li>
+        <li>We review your application and send credentials to your email within 1–7 days.</li>
+        <li>Sign in with your email and password at the beta URL.</li>
+        <li>Start using FlowDesk and share your feedback.</li>
+      </ul>
+
+      <div style="margin-top: 32px;">
+        <a class="cta-btn" href="https://forms.gle/YGGhhC1ExfLs5isJA" target="_blank">
+          Apply for Beta Access
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>© 2026 FlowDesk. All rights reserved.</p>
+      <a href="mailto:projenda510@gmail.com">projenda510@gmail.com</a>
+    </footer>
+
+  </div>
+</body>
+</html>
